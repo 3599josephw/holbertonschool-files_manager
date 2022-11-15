@@ -1,5 +1,7 @@
-const express = require('express')
-const app = express()
+const express = require('express');
+const routes = require('./routes/index');
+
+const app = express();
 
 let port;
 if (process.env.PORT) {
@@ -8,6 +10,6 @@ if (process.env.PORT) {
   port = 5000;
 }
 
+app.use(express.json());
+app.use('/', routes);
 app.listen(port);
-
-module.exports = app;
