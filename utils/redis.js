@@ -9,9 +9,12 @@ class RedisClient {
   }
 
   isAlive() {
-    const response = this.client.ping();
-    console.log('isALive:' + response);
-    return true;
+    try {
+      this.client.ping();
+      return true;
+    } catch (err) {
+      return false;
+    }
   }
 }
 
