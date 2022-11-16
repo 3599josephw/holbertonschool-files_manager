@@ -7,19 +7,10 @@ const db = require('../utils/db');
 class FilesController {
   static postUpload(req, resp) {
     const xtoken = `auth_${req.headers['x-token']}`;
-    let userId;
-    redis.get(xtoken).then((result) => {
-      if (!result) {
-        return resp.status(401).json({ error: 'Unauthorized' });
-      }
-      userId = result;
-    });
-    db.db.collection('users').findOne({ userId }, (err, result) => {
-      if (!result) {
-        return resp.status(401).json({ error: 'Unauthorized' });
-      }
-      
-    });
+    const key = redis.get(xtoken);
+    if (!key) {
+      return resp.status(401).json({ error: 'Unauthorized' });
+    }
   }
 }
 
