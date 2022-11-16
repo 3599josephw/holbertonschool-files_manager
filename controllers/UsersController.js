@@ -15,11 +15,12 @@ class UsersController {
     }
     const hashedPWD = crypto.createHash('sha1').update(password).digest('hex');
     const user = db.db.collection('users').findOne({ email });
-    if (user.data !== undefined) {
+    if (user) {
       return resp.status(400).json({ error: 'Already exist' });
     }
     const newUser = db.db.collection('users').insertOne({ email, password: hashedPWD });
-    return resp.status(201).send(newUser);
+    const processResults = newUser;
+    return processResults.then((result) => resp.status(201).send({ id: result.ops[0]._id, email: result.ops[0].email }));
   }
 }
 
