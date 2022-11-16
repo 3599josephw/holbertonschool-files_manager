@@ -18,8 +18,8 @@ class UsersController {
     if (user.data !== undefined) {
       return resp.status(400).json({ error: 'Already exist' });
     }
-    const newUser = db.db.collection('users').insertOne({ email: email, password: hashedPWD });
-    return resp.status(201).json(newUser);
+    const newUser = db.db.collection('users').insertOne({ email, password: hashedPWD });
+    return resp.status(201).send(newUser);
   }
 }
 
