@@ -48,7 +48,6 @@ class AuthController {
       if (!result) {
         return resp.status(401).json({ error: 'Unauthorized' });
       }
-      console.log(result);
       return resp.status(200).send({ id: result._id, email: result.email });
     });
   }
