@@ -3,17 +3,29 @@ const crypto = require('crypto');
 const uuid4 = require('uuid4');
 const redis = require('../utils/redis');
 const db = require('../utils/db');
+const fs = require('fs');
+
+/*
+
+"Create a local path in the storing folder with filename a UUID" - not sure what this means
+
+
+*/
 
 class FilesController {
   static postUpload(req, resp) {
+    /* Saves a file with data to local disc & to DB */
+
     const xtoken = `auth_${req.headers['x-token']}`;
     const key = redis.get(xtoken);
+    /* Verify user */
     if (!key) {
       return resp.status(401).json({ error: 'Unauthorized' });
     }
-    const { name } = req.body;
-    const { type } = req.body;
-    const { data } = req.body;
+
+    /* Get file parameters, then error checks */
+    let { name, type, data, parentId, isPublic } = req.body;
+
     if (!name) {
       return resp.status(400).json({ error: 'Missing name' });
     }
@@ -24,17 +36,52 @@ class FilesController {
       return resp.status(400).json({ error: 'Missing data' });
     }
 
-    let { parentId } = req.body;
+    /* if there is data, decode to utf8 */
+    if (data) {
+      const buff = Buffer.from(data, 'base64');
+      data = buff.toString('utf8');
+    }
+
     if (!parentId) {
       parentId = 0;
     } else {
-
+      /* [if not type folder: error] */
     }
 
-    let { isPublic } = req.body;
     if (!isPublic) {
       isPublic = false;
     }
+
+    /* get path to save file from env or default */
+    let path;
+    if (process.env.FOLDER_PATH && process.env.FOLDER_PATH !== '') {
+      path = process.env.FOLDER_PATH;
+    } else {
+      path = '/tmp/files_manager';
+    }
+
+    /* create directory if needed, then save file to disc */
+    if (type !== 'folder') {
+      if (!fs.existsSync(path)) {
+        fs.mkdir(path, { recursive: true }, (err) => {
+          if (err) console.log(err);
+        });
+      }
+      fs.appendFile(`${path}/${name}`, data, function (err) {
+        if (err) {
+          console.log(err);
+        } else {
+          console.log('SUCCESS');
+        }
+      })
+    }
+
+    /* save file to DB */
+    const newFile = db.db.collection('files').insertOne({ userId: key, name: name,
+                                                            type: type, isPublic: isPublic,
+                                                            parentId: parentId, localPath: path});
+    const processResults = newFile;
+    return processResults.then((result) => resp.status(201).send(result));
   }
 }
 
