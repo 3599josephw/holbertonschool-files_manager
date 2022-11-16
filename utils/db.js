@@ -1,6 +1,5 @@
 const { MongoClient } = require('mongodb');
 
-
 class DBClient {
   constructor() {
     if (process.env.DB_HOST) {
@@ -23,25 +22,21 @@ class DBClient {
     this.url = `mongodb://${this.host}:${this.port}/${this.database}`;
     MongoClient.connect(this.url, { useUnifiedTopology: true }, (err, client) => {
       if (!err) {
-          this.db = client.db(this.database);
-      }
-      else
-          console.log("Error in the connectivity");
+        this.db = client.db(this.database);
+      } else { console.log('Error in the connectivity'); }
     });
   }
 
   isAlive() {
     if (this.db) {
       return true;
-    } else {
-      return false;
     }
+    return false;
   }
 
   async nbUsers() {
     const collection = this.db.collection('users').countDocuments();
     return collection;
-
   }
 
   async nbFiles() {
