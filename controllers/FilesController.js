@@ -1,14 +1,14 @@
 // FilesController
 const crypto = require('crypto');
 const uuid4 = require('uuid4');
+const fs = require('fs');
+const mongo = require('mongodb');
 const redis = require('../utils/redis');
 const db = require('../utils/db');
-const fs = require('fs');
 
 /*
 
 "Create a local path in the storing folder with filename a UUID" - not sure what this means
-
 
 */
 
@@ -24,7 +24,9 @@ class FilesController {
     }
 
     /* Get file parameters, then error checks */
-    let { name, type, data, parentId, isPublic } = req.body;
+    let {
+      name, type, data, parentId, isPublic,
+    } = req.body;
 
     if (!name) {
       return resp.status(400).json({ error: 'Missing name' });
@@ -67,21 +69,58 @@ class FilesController {
           if (err) console.log(err);
         });
       }
-      fs.appendFile(`${path}/${name}`, data, function (err) {
+      fs.appendFile(`${path}/${name}`, data, (err) => {
         if (err) {
           console.log(err);
         } else {
           console.log('SUCCESS');
         }
-      })
+      });
     }
 
     /* save file to DB */
-    const newFile = db.db.collection('files').insertOne({ userId: key, name: name,
-                                                            type: type, isPublic: isPublic,
-                                                            parentId: parentId, localPath: path});
+    const newFile = db.db.collection('files').insertOne({
+      userId: key,
+      name,
+      type,
+      isPublic,
+      parentId,
+      localPath: path,
+    });
     const processResults = newFile;
     return processResults.then((result) => resp.status(201).send(result));
+  }
+
+  static getShow(req, resp) {
+    const xtoken = `auth_${req.headers['x-token']}`;
+    const key = redis.get(xtoken);
+    /* Verify user */
+    if (!key) {
+      return resp.status(401).json({ error: 'Unauthorized' });
+    }
+
+    const { id } = req.params;
+    const file = db.db.collection('files').findOne({ _id: new mongo.ObjectID(id) });
+    if (!file) {
+      return resp.status(404).json({ error: 'Not found' });
+    }
+    return resp.status(200).send({
+      id: file._id,
+      userId: file.userId,
+      name: file.name,
+      type: file.type,
+      isPublic: file.isPublic,
+      parentId: file.parentId,
+    });
+  }
+
+  static getIndex(req, resp) {
+    const xtoken = `auth_${req.headers['x-token']}`;
+    const key = redis.get(xtoken);
+    /* Verify user */
+    if (!key) {
+      return resp.status(401).json({ error: 'Unauthorized' });
+    }
   }
 }
 
