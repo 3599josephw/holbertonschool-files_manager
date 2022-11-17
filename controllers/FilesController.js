@@ -100,17 +100,18 @@ class FilesController {
     }
 
     const { id } = req.params;
-    const file = db.db.collection('files').findOne({ _id: new mongo.ObjectID(id) });
-    if (!file) {
-      return resp.status(404).json({ error: 'Not found' });
-    }
-    return resp.status(200).send({
-      id: file._id,
-      userId: file.userId,
-      name: file.name,
-      type: file.type,
-      isPublic: file.isPublic,
-      parentId: file.parentId,
+    db.db.collection('files').findOne({ _id: id }).then((file) => {
+      if (!file) {
+        return resp.status(404).json({ error: 'Not found' });
+      }
+      return resp.status(200).send({
+        id: file._id,
+        userId: file.userId,
+        name: file.name,
+        type: file.type,
+        isPublic: file.isPublic,
+        parentId: file.parentId,
+      });
     });
   }
 
