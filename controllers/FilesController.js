@@ -150,7 +150,7 @@ class FilesController {
       });
     } else {
       db.db.collection.aggregate([
-        { $match: { userId: pId } },
+        { $match: { parentId: pId } },
         { $skip: page * 20 },
         { $limit: 20 }
       ]).toArray().then((files) => {
