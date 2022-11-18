@@ -165,7 +165,10 @@ class FilesController {
         return resp.status(200).send(fileArray);
       });
     }
+  }
 
+  static putPublish(req, resp) {
+    
   }
 }
 
