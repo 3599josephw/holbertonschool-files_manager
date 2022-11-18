@@ -10,9 +10,9 @@ class AppController {
     return resp.json('Not connected');
   }
 
-  static getStats(req, resp) {
-    const userNum = db.nbUsers();
-    const fileNum = db.nbFiles();
+  static async getStats(req, resp) {
+    const userNum = await db.nbUsers();
+    const fileNum = await db.nbFiles();
     return resp.status(200).json({ users: userNum, files: fileNum });
   }
 }

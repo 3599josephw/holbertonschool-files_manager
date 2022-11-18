@@ -34,23 +34,6 @@ class AuthController {
       return resp.status(204);
     });
   }
-
-  static getMe(req, resp) {
-    const xtoken = `auth_${req.headers['x-token']}`;
-    let userId;
-    redis.get(xtoken).then((result) => {
-      if (!result) {
-        return resp.status(401).json({ error: 'Unauthorized' });
-      }
-      userId = result;
-    });
-    db.db.collection('users').findOne({ userId }, (err, result) => {
-      if (!result) {
-        return resp.status(401).json({ error: 'Unauthorized' });
-      }
-      return resp.status(200).send({ id: result._id, email: result.email });
-    });
-  }
 }
 
 module.exports = AuthController;
