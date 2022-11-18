@@ -3,6 +3,7 @@ const crypto = require('crypto');
 const uuid4 = require('uuid4');
 const fs = require('fs');
 const mongo = require('mongodb');
+const mime = require('mime-types');
 const redis = require('../utils/redis');
 const db = require('../utils/db');
 
@@ -217,6 +218,26 @@ class FilesController {
       });
     file.isPublic = false;
     return resp.status(200).send(file);
+  }
+
+  static async getFile(req, resp) {
+    const xtoken = `auth_${req.headers['x-token']}`;
+    const key = await redis.get(xtoken);
+    /* Verify user */
+    if (!key) {
+      return resp.status(401).json({ error: 'Unauthorized' });
+    }
+    const { id } = req.params;
+    const file = await db.db.collection('files').findOne({ _id: new mongo.ObjectID(id) });
+    if (!file || file.userId.toString() !== key || file.isPublic === false) {
+      return resp.status(404).json({ error: 'Not found' });
+    }
+    if (file.type === 'folder') {
+      return resp.status(400).json({ error: 'A folder doesn\'t have content' });
+    }
+    const mimeType = mime.lookup(file.name);
+    const text = fs.readFileSync(`${file.localPath}/${file.name}`);
+    return resp.status(200).send(text);
   }
 }
 
