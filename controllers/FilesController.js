@@ -2,6 +2,7 @@
 const crypto = require('crypto');
 const uuid4 = require('uuid4');
 const fs = require('fs');
+const bull = require('bull');
 const mongo = require('mongodb');
 const mime = require('mime-types');
 const redis = require('../utils/redis');
@@ -77,6 +78,8 @@ class FilesController {
           console.log('SUCCESS');
         }
       });
+
+      const fileQueue = bull.Queue('fileQueue');
     }
 
     /* save file to DB */
