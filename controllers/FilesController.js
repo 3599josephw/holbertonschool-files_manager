@@ -101,7 +101,7 @@ class FilesController {
 
     const { id } = req.params;
     db.db.collection('files').findOne({ _id: id }).then((file) => {
-      if (!file) {
+      if (!file || file.userId !== key) {
         return resp.status(404).json({ error: 'Not found' });
       }
       return resp.status(200).send({
@@ -122,6 +122,50 @@ class FilesController {
     if (!key) {
       return resp.status(401).json({ error: 'Unauthorized' });
     }
+
+    /* Get parentId parameter */
+    let pId;
+    if (req.query.parentId) {
+      pId = req.query.parentId;
+    } else {
+      pId = 0;
+    }
+
+    /* MongoDB Aggregation */
+    if (pId == 0) {
+      db.db.collection.aggregate([
+        { $match: { userId: key } },
+        { $skip: page * 20 },
+        { $limit: 20 }
+      ]).toArray().then((files) => {
+        const fileArray = files.map((file) => ({
+          id: file._id,
+          userId: file.userId,
+          name: file.name,
+          type: file.type,
+          isPublic: file.isPublic,
+          parentId: file.parentId
+        }));
+        return resp.status(200).send(fileArray);
+      });
+    } else {
+      db.db.collection.aggregate([
+        { $match: { userId: pId } },
+        { $skip: page * 20 },
+        { $limit: 20 }
+      ]).toArray().then((files) => {
+        const fileArray = files.map((file) => ({
+          id: file._id,
+          userId: file.userId,
+          name: file.name,
+          type: file.type,
+          isPublic: file.isPublic,
+          parentId: file.parentId
+        }));
+        return resp.status(200).send(fileArray);
+      });
+    }
+
   }
 }
 
