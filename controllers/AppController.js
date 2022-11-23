@@ -4,10 +4,9 @@ const db = require('../utils/db');
 
 class AppController {
   static getStatus(req, resp) {
-    if (reds.isAlive() && db.isAlive()) {
-      return resp.status(200).json({ redis: true, db: true });
-    }
-    return resp.json('Not connected');
+    const redisAlive = reds.isAlive();
+    const mongoAlive = db.isAlive();
+    return resp.status(200).json({ redis: redisAlive, db: mongoAlive });
   }
 
   static async getStats(req, resp) {
