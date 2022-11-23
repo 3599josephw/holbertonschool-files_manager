@@ -11,5 +11,5 @@ if (process.env.PORT) {
 }
 
 app.use(express.json());
-app.use('/', routes);
+app.use(routes);
 app.listen(port);
