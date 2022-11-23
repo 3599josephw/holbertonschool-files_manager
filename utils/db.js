@@ -2,23 +2,10 @@ const { MongoClient } = require('mongodb');
 
 class DBClient {
   constructor() {
-    if (process.env.DB_HOST) {
-      this.host = process.env.DB_HOST;
-    } else {
-      this.host = 'localhost';
-    }
+    this.host = process.env.DB_HOST || 'localhost';
+    this.port = process.env.DB_PORT || 27017;
+    this.database = process.env.DB_DATABASE || 'files_manager';
 
-    if (process.env.DB_PORT) {
-      this.port = process.env.DB_PORT;
-    } else {
-      this.port = '27017';
-    }
-
-    if (process.env.DB_DATABASE) {
-      this.database = process.env.DB_DATABASE;
-    } else {
-      this.database = 'files_manager';
-    }
     this.url = `mongodb://${this.host}:${this.port}`;
     MongoClient.connect(this.url, { useUnifiedTopology: true }, (err, client) => {
       if (!err) {
