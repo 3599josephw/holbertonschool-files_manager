@@ -19,7 +19,7 @@ class DBClient {
     } else {
       this.database = 'files_manager';
     }
-    this.url = `mongodb://${this.host}:${this.port}/${this.database}`;
+    this.url = `mongodb://${this.host}:${this.port}`;
     MongoClient.connect(this.url, { useUnifiedTopology: true }, (err, client) => {
       if (!err) {
         this.db = client.db(this.database);
