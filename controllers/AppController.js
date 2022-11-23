@@ -3,7 +3,7 @@ const reds = require('../utils/redis');
 const db = require('../utils/db');
 
 class AppController {
-  static getStatus(req, resp) {
+  static async getStatus(req, resp) {
     const redisAlive = reds.isAlive();
     const mongoAlive = db.isAlive();
     resp.status(200).json({ redis: redisAlive, db: mongoAlive });
