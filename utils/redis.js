@@ -1,5 +1,5 @@
 /* RedisClient */
-import { createClient } from 'redis';
+const { createClient } = require('redis');
 const { promisify } = require("util");
 class RedisClient {
 
